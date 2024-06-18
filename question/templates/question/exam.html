@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exam</title>
+    <script>
+        function checkAnswer(questionId) {
+            const answerElement = document.querySelector('input[name="question-' + questionId + '"]:checked');
+            if (!answerElement) {
+                alert('Please select an answer.');
+                return;
+            }
+            const answerId = answerElement.value;
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch("{% url 'exam' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                },
+                body: JSON.stringify({
+                    question_id: questionId,
+                    answer_id: answerId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result-' + questionId).innerHTML = `
+                    <p><strong>Your answer:</strong> ${data.selected_answer}</p>
+                    <p><strong>Correct answer:</strong> ${data.correct_answer}</p>
+                    <p>${data.is_correct ? 'Correct!' : 'Incorrect!'}</p>
+                    <p><strong>Explanation:</strong> ${data.explanation}</p>
+                `;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</head>
+<body>
+    <h1>Exam</h1>
+    <form>
+        {% csrf_token %}
+        {% for question in questions %}
+            <div id="question-{{ question.id }}">
+                <h3>{{ question.text }}</h3>
+                {% for answer in question.answers.all %}
+                    <label>
+                        <input type="radio" name="question-{{ question.id }}" value="{{ answer.id }}" required>
+                        {{ answer.text }}
+                    </label><br>
+                {% endfor %}
+                <button type="button" onclick="checkAnswer({{ question.id }})">Check Answer</button>
+                <div id="result-{{ question.id }}"></div>
+            </div>
+            <hr>
+        {% endfor %}
+    </form>
+</body>
+</html>

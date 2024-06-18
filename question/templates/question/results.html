@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Results</title>
+</head>
+<body>
+    <h1>Results</h1>
+    {% for result in results %}
+        <h3>{{ result.question.text }}</h3>
+        <p>Your answer: {{ result.selected_answer.text }}</p>
+        <p>Correct answer: {{ result.correct_answer.text }}</p>
+        {% if result.is_correct %}
+            <p style="color: green;">Correct!</p>
+        {% else %}
+            <p style="color: red;">Incorrect!</p>
+        {% endif %}
+        <p>Explanation: {{ result.explanation.text }}</p>
+        <hr>
+    {% endfor %}
+</body>
+</html>
